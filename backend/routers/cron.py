@@ -76,7 +76,8 @@ def trigger_finalize_votes(db: Session = Depends(get_db)):
     unlocked_groups = (
         db.query(models.Group)
         .filter(
-            models.Group.is_locked.is_(False), func.date(models.Group.created_at) == today
+            models.Group.is_locked.is_(False),
+            func.date(models.Group.created_at) == today,
         )
         .all()
     )
