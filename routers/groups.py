@@ -42,6 +42,9 @@ def join_group(group_id: int, request: JoinGroupRequest, db: Session = Depends(g
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
         
+    if group.is_locked:
+        raise HTTPException(status_code=400, detail="Cannot join: Group is finalized and locked")
+        
     # 4. Enforce group member limit (max 6 members)
     current_members = db.query(models.GroupMember).filter(models.GroupMember.group_id == group_id).count()
     if current_members >= 6:
