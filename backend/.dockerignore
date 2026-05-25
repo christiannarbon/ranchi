@@ -1,0 +1,22 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environments (CRITICAL to ignore to prevent overwriting Docker's linux venv)
+.venv/
+venv/
+env/
+.env
+
+# Tooling
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/

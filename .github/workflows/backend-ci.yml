@@ -32,3 +32,13 @@ jobs:
         ruff check .
         # Check if formatting adheres to ruff standard
         ruff format --check .
+
+  docker-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Hadolint Backend Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: backend/Dockerfile
