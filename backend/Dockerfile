@@ -9,8 +9,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install uv securely via pip
-RUN pip install --no-cache-dir uv
+# Install uv securely via pip (pinned version for strict reproducibility)
+RUN pip install --no-cache-dir uv==0.11.16
 
 # Copy only the dependency files first to leverage Docker layer caching
 COPY pyproject.toml uv.lock ./
