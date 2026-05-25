@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from database import engine
 import models
-from routers import users, groups, restaurants, voting
+from routers import users, groups, restaurants, voting, cron
 
 # Automatically create all database tables using SQLAlchemy
 models.Base.metadata.create_all(bind=engine)
@@ -17,6 +17,7 @@ app.include_router(users.router)
 app.include_router(groups.router)
 app.include_router(restaurants.router)
 app.include_router(voting.router)
+app.include_router(cron.router)
 
 @app.get("/")
 def read_root():
