@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from database import engine
+from core.database import engine
 import models
 from routers import users, groups, restaurants, voting, cron
 

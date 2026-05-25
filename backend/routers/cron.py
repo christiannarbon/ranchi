@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 import models
-from database import get_db, settings
+from core.database import get_db, settings
 from routers.voting import finalize_group
 
 logger = logging.getLogger(__name__)

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 import models
 import schemas
-from database import get_db
+from core.database import get_db
 
 router = APIRouter(
     prefix="/users",
