@@ -13,6 +13,10 @@ format:
 	@echo "Running ruff formatter..."
 	cd backend && uv run ruff format .
 
-check: lint
+check: lint test
 	@echo "Running ruff format check..."
 	cd backend && uv run ruff format --check .
+
+test:
+	@echo "Running unit tests with pytest..."
+	cd backend && uv run pytest test/unit
