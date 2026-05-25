@@ -9,7 +9,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="Ranchi App API",
     description="Backend API for user groups and nominations",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Include the routers
@@ -18,6 +18,7 @@ app.include_router(groups.router)
 app.include_router(restaurants.router)
 app.include_router(voting.router)
 app.include_router(cron.router)
+
 
 @app.get("/")
 def read_root():
