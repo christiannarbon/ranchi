@@ -9,6 +9,9 @@ on:
 jobs:
   lint-and-format:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
     defaults:
       run:
         working-directory: ./frontend
@@ -31,3 +34,8 @@ jobs:
         
     - name: Run Linter
       run: npm run lint -- --max-warnings=0
+
+    - name: Clear old GitHub Actions caches
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh cache delete --all --succeed-on-no-caches

@@ -1,6 +1,7 @@
 <script setup>
 import { useLunchStore } from '../stores/lunch'
 import { storeToRefs } from 'pinia'
+import GroupVoting from './GroupVoting.vue'
 
 const store = useLunchStore()
 const { currentUserStatus, availableCoworkers, currentGroupId, isStatusLoading, isGroupLoading } =
@@ -177,6 +178,9 @@ const statuses = [
         </button>
       </div>
     </section>
+
+    <!-- Group Voting / Nomination Section -->
+    <GroupVoting v-if="currentGroupId" />
 
     <!-- Coworkers Looking -->
     <section v-if="currentUserStatus === 'Looking' || currentUserStatus === 'Unknown'">

@@ -9,6 +9,9 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
     defaults:
       run:
         working-directory: ./backend
@@ -36,6 +39,11 @@ jobs:
 
     - name: Run Unit Tests
       run: uv run pytest test/unit
+
+    - name: Clear old GitHub Actions caches
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh cache delete --all --succeed-on-no-caches
 
   docker-lint:
     runs-on: ubuntu-latest
