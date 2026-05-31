@@ -9,6 +9,8 @@ from sqlalchemy.pool import StaticPool
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["CRON_SECRET"] = "test_secret"
 os.environ["GOOGLE_PLACES_API_KEY"] = "test_key"
+os.environ["SLACK_BOT_TOKEN"] = "test_token"
+os.environ["SLACK_SIGNING_SECRET"] = "test_secret"
 
 from main import app
 from core.database import get_db
