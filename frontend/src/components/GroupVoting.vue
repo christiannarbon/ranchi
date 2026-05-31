@@ -6,6 +6,10 @@ const searchResults = ref([])
 const isSearching = ref(false)
 const shortlist = ref([])
 
+const hasVoted = ref(false)
+const showWinnerModal = ref(false)
+const winningRestaurant = ref(null)
+
 // Mock database of restaurants
 const mockDatabase = [
   { id: 'r1', name: 'Shake Shack', type: 'Burger', rating: 4.5 },
@@ -43,13 +47,36 @@ const addToShortlist = (restaurant) => {
   if (shortlist.value.length >= 3) return
   if (shortlist.value.find((r) => r.id === restaurant.id)) return // Prevent duplicates
 
-  shortlist.value.push(restaurant)
+  shortlist.value.push({ ...restaurant, votes: 0 })
   searchQuery.value = '' // clear search after selecting
   searchResults.value = []
 }
 
 const removeFromShortlist = (id) => {
   shortlist.value = shortlist.value.filter((r) => r.id !== id)
+}
+
+const upvote = (id) => {
+  if (hasVoted.value) return
+  const item = shortlist.value.find((r) => r.id === id)
+  if (item) {
+    item.votes++
+    hasVoted.value = true
+  }
+}
+
+const spinTheWheel = () => {
+  if (shortlist.value.length === 0) return
+
+  // Basic random selection
+  const randomIndex = Math.floor(Math.random() * shortlist.value.length)
+  winningRestaurant.value = shortlist.value[randomIndex]
+  showWinnerModal.value = true
+}
+
+const closeModal = () => {
+  showWinnerModal.value = false
+  winningRestaurant.value = null
 }
 </script>
 
@@ -197,26 +224,57 @@ const removeFromShortlist = (id) => {
             <p class="text-sm text-slate-500 font-medium">{{ item.type }}</p>
           </div>
         </div>
-        <button
-          @click="removeFromShortlist(item.id)"
-          class="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-100 rounded-full transition-colors active:scale-95"
-          title="Remove"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+
+        <div class="flex items-center gap-2">
+          <!-- Upvote Button -->
+          <button
+            @click="upvote(item.id)"
+            :disabled="hasVoted"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all"
+            :class="
+              hasVoted
+                ? 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed'
+                : 'bg-white border-orange-200 text-orange-600 hover:bg-orange-50 hover:border-orange-300 shadow-sm active:scale-95'
+            "
+            title="Upvote"
           >
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              stroke="none"
+            >
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              ></polygon>
+            </svg>
+            <span class="font-bold">{{ item.votes }}</span>
+          </button>
+
+          <!-- Remove Button -->
+          <button
+            @click="removeFromShortlist(item.id)"
+            class="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-100 rounded-full transition-colors active:scale-95"
+            title="Remove"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -246,6 +304,78 @@ const removeFromShortlist = (id) => {
         <polyline points="22 4 12 14.01 9 11.01"></polyline>
       </svg>
       Maximum nominations reached
+    </div>
+
+    <!-- Spin the Wheel Button -->
+    <button
+      @click="spinTheWheel"
+      :disabled="shortlist.length === 0"
+      class="mt-4 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-lg shadow-emerald-500/30 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+      </svg>
+      Spin the Wheel (Randomize)
+    </button>
+  </div>
+
+  <!-- Winner Modal -->
+  <div v-if="showWinnerModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="closeModal"></div>
+
+    <!-- Modal Content -->
+    <div
+      class="relative bg-white w-full max-w-sm rounded-3xl p-8 text-center shadow-2xl transform transition-all flex flex-col items-center"
+    >
+      <div
+        class="w-20 h-20 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mb-6 shadow-inner"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="40"
+          height="40"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+          <path d="M4 22h16"></path>
+          <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+        </svg>
+      </div>
+
+      <h3 class="text-xs uppercase tracking-widest font-bold text-slate-400 mb-2">
+        We have a winner!
+      </h3>
+      <h2 class="text-3xl font-black text-slate-800 mb-1">{{ winningRestaurant?.name }}</h2>
+      <p class="text-slate-500 font-medium mb-8">
+        {{ winningRestaurant?.type }} • ⭐ {{ winningRestaurant?.rating }}
+      </p>
+
+      <button
+        @click="closeModal"
+        class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition-colors"
+      >
+        Let's Go Eat!
+      </button>
     </div>
   </div>
 </template>
