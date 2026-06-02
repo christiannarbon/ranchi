@@ -8,6 +8,8 @@ from sqlalchemy import func
 import models
 from core.database import get_db, settings
 from routers.voting import finalize_group
+from slack_sdk.errors import SlackApiError
+from services.slack import client
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +31,13 @@ def morning_prompt(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
 
     for user in users:
+        if not user.slack_user_id:
+            logger.warning(f"User {user.id} has no slack_user_id, skipping.")
+            continue
+
         # Simulate Slack Block Kit payload
         slack_payload = {
-            "channel": user.email,  # simulating a DM using email as identifier
+            "channel": user.slack_user_id,
             "blocks": [
                 {
                     "type": "section",
@@ -46,13 +52,13 @@ def morning_prompt(db: Session = Depends(get_db)):
                         {
                             "type": "button",
                             "text": {"type": "plain_text", "text": "Yes, I'm looking"},
-                            "value": "status_looking",
+                            "value": f"{user.id}:status_looking",
                             "action_id": "set_status_looking",
                         },
                         {
                             "type": "button",
                             "text": {"type": "plain_text", "text": "No, skip me"},
-                            "value": "status_skip",
+                            "value": f"{user.id}:status_skip",
                             "action_id": "set_status_skip",
                         },
                     ],
@@ -60,9 +66,12 @@ def morning_prompt(db: Session = Depends(get_db)):
             ],
         }
 
-        # Print the structured JSON to standard output as per requirements
-        print(f"\\n--- SLACK PAYLOAD (MORNING PROMPT) FOR {user.email} ---")
-        print(json.dumps(slack_payload, indent=2))
+        try:
+            client.chat_postMessage(
+                channel=user.slack_user_id, blocks=slack_payload["blocks"]
+            )
+        except SlackApiError as e:
+            logger.error(f"Failed to DM user {user.id}: {e.response['error']}")
 
     return {"status": "Morning prompts simulated", "users_notified": len(users)}
 

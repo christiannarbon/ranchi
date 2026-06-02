@@ -15,6 +15,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
     name: Mapped[str] = mapped_column(String)
     daily_status: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    slack_user_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     group_members: Mapped[List["GroupMember"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"

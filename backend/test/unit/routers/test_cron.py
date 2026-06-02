@@ -1,4 +1,5 @@
-from models import Group
+import unittest.mock as mock
+from models import Group, User
 
 
 def test_cron_missing_secret(client):
@@ -17,6 +18,27 @@ def test_cron_morning_prompt(client):
     )
     assert response.status_code == 200
     assert response.json()["status"] == "Morning prompts simulated"
+
+
+@mock.patch("routers.cron.client.chat_postMessage")
+def test_morning_prompt_sends_real_dm(mock_post_message, client, db_session):
+    user1 = User(name="User 1", email="user1@example.com", slack_user_id="U1234")
+    user2 = User(name="User 2", email="user2@example.com", slack_user_id="U5678")
+    db_session.add(user1)
+    db_session.add(user2)
+    db_session.commit()
+
+    response = client.post(
+        "/cron/morning-prompt", headers={"X-Cron-Secret": "test_secret"}
+    )
+
+    assert response.status_code == 200
+    assert mock_post_message.call_count == 2
+
+    calls = mock_post_message.call_args_list
+    channels_called = [call.kwargs.get("channel") for call in calls]
+    assert "U1234" in channels_called
+    assert "U5678" in channels_called
 
 
 def test_cron_finalize_votes(client, db_session):
