@@ -1,4 +1,3 @@
-import json
 import logging
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Header
@@ -124,8 +123,14 @@ def trigger_finalize_votes(db: Session = Depends(get_db)):
                     .first()
                 )
                 if user:
+                    if not user.slack_user_id:
+                        logger.warning(
+                            f"User {user.id} has no slack_user_id, skipping notification."
+                        )
+                        continue
+
                     slack_payload = {
-                        "channel": user.email,
+                        "channel": user.slack_user_id,
                         "blocks": [
                             {
                                 "type": "section",
@@ -136,12 +141,24 @@ def trigger_finalize_votes(db: Session = Depends(get_db)):
                             }
                         ],
                     }
-                    print(
-                        f"\\n--- SLACK PAYLOAD (WINNER ANNOUNCEMENT) FOR {user.email} ---"
-                    )
-                    print(json.dumps(slack_payload, indent=2))
+                    try:
+                        client.chat_postMessage(
+                            channel=user.slack_user_id, blocks=slack_payload["blocks"]
+                        )
+                    except SlackApiError as e:
+                        logger.error(
+                            f"Failed to notify user {user.id}: {e.response['error']}"
+                        )
+                    except Exception as e:
+                        logger.error(
+                            f"Unexpected error notifying user {user.id}: {str(e)}"
+                        )
 
         except HTTPException as e:
             logger.error(f"Failed to finalize group {group.id}: {e.detail}")
+            db.rollback()
+        except Exception as e:
+            logger.error(f"Unexpected error finalizing group {group.id}: {str(e)}")
+            db.rollback()
 
     return {"status": "Groups finalized", "groups_processed": finalized_count}
