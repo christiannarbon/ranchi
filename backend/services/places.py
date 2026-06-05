@@ -1,15 +1,8 @@
 import httpx
 import logging
-from pydantic_settings import BaseSettings
+from core.config import settings
 
 logger = logging.getLogger(__name__)
-
-
-class PlacesSettings(BaseSettings):
-    google_places_api_key: str = "mock_key"  # Placeholder for future API key
-
-
-settings = PlacesSettings()
 
 
 async def search_nearby_restaurants(query: str) -> list[dict]:

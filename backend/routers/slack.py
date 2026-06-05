@@ -7,7 +7,8 @@ from slack_sdk.signature import SignatureVerifier
 from sqlalchemy.orm import Session
 
 import models
-from core.database import get_db, settings
+from core.database import get_db
+from core.config import settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/slack", tags=["slack"])

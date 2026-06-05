@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 import models
-from core.database import get_db, settings
+from core.database import get_db
+from core.config import settings
 from routers.voting import finalize_group
 from slack_sdk.errors import SlackApiError
 from services.slack import client
