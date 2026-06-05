@@ -1,16 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
 import models
 import schemas
 from core.database import get_db
 
 router = APIRouter(prefix="/groups", tags=["groups"])
-
-
-class JoinGroupRequest(BaseModel):
-    user_id: int
 
 
 @router.post("", response_model=schemas.GroupResponse)
@@ -24,7 +19,9 @@ def create_group(group: schemas.GroupCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/{group_id}/join", response_model=schemas.GroupMemberResponse)
-def join_group(group_id: int, request: JoinGroupRequest, db: Session = Depends(get_db)):
+def join_group(
+    group_id: int, request: schemas.JoinGroupRequest, db: Session = Depends(get_db)
+):
     """Add a user to a group, enforcing constraints."""
     user_id = request.user_id
 

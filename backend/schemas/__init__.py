@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Literal
 
 
 # --- User Schemas ---
@@ -85,3 +85,25 @@ class VoteResponse(VoteBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# --- Request Body Schemas ---
+
+
+class JoinGroupRequest(BaseModel):
+    user_id: int
+
+
+class NominateRequest(BaseModel):
+    user_id: int
+    restaurant_name: str
+    google_place_id: Optional[str] = None
+
+
+class VoteRequest(BaseModel):
+    user_id: int
+    nomination_id: int
+
+
+class StatusUpdate(BaseModel):
+    daily_status: Literal["Looking", "Solo", "Bring Own"]

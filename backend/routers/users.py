@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
-from typing import List, Literal
-from pydantic import BaseModel
+from typing import List
 
 import models
 import schemas
@@ -45,14 +44,10 @@ def get_looking_users(db: Session = Depends(get_db)):
     return users
 
 
-class StatusUpdate(BaseModel):
-    daily_status: Literal["Looking", "Solo", "Bring Own"]
-
-
 @router.patch("/{user_id}/status", response_model=schemas.UserResponse)
 def update_status(
     user_id: int,
-    body: StatusUpdate,
+    body: schemas.StatusUpdate,
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):

@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from pydantic import BaseModel
 import random
 
 import models
@@ -11,19 +10,10 @@ from core.database import get_db
 router = APIRouter(prefix="/groups", tags=["voting"])
 
 
-class NominateRequest(BaseModel):
-    user_id: int
-    restaurant_name: str
-    google_place_id: str | None = None
-
-
-class VoteRequest(BaseModel):
-    user_id: int
-    nomination_id: int
-
-
 @router.post("/{group_id}/nominate", response_model=schemas.NominationResponse)
-def nominate(group_id: int, request: NominateRequest, db: Session = Depends(get_db)):
+def nominate(
+    group_id: int, request: schemas.NominateRequest, db: Session = Depends(get_db)
+):
     """Nominate a restaurant for a group."""
     group = db.query(models.Group).filter(models.Group.id == group_id).first()
     if not group:
@@ -84,7 +74,7 @@ def nominate(group_id: int, request: NominateRequest, db: Session = Depends(get_
 
 
 @router.post("/{group_id}/vote", response_model=schemas.VoteResponse)
-def vote(group_id: int, request: VoteRequest, db: Session = Depends(get_db)):
+def vote(group_id: int, request: schemas.VoteRequest, db: Session = Depends(get_db)):
     """Vote for a specific nomination in the group."""
     group = db.query(models.Group).filter(models.Group.id == group_id).first()
     if not group:
