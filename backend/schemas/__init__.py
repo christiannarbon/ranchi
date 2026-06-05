@@ -21,6 +21,14 @@ class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserPublicResponse(UserBase):
+    """User response schema for endpoints that do not need to expose the api_token."""
+
+    id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 # --- Group Schemas ---
 class GroupBase(BaseModel):
     is_locked: bool = False

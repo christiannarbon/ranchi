@@ -32,19 +32,19 @@ def register_user(
     return user
 
 
-@router.get("/me", response_model=schemas.UserResponse)
+@router.get("/me", response_model=schemas.UserPublicResponse)
 def get_me(current_user: models.User = Depends(get_current_user)):
     return current_user
 
 
-@router.get("/looking", response_model=List[schemas.UserResponse])
+@router.get("/looking", response_model=List[schemas.UserPublicResponse])
 def get_looking_users(db: Session = Depends(get_db)):
     """Retrieve all users whose daily status is 'Looking'."""
     users = db.query(models.User).filter(models.User.daily_status == "Looking").all()
     return users
 
 
-@router.patch("/{user_id}/status", response_model=schemas.UserResponse)
+@router.patch("/{user_id}/status", response_model=schemas.UserPublicResponse)
 def update_status(
     user_id: int,
     body: schemas.StatusUpdate,

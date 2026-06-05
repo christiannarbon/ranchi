@@ -87,3 +87,39 @@ def test_interactions_unknown_user(client, mock_valid_signature):
 
     assert response.status_code == 200
     assert response.json() == {"ok": True}
+
+
+@mock.patch("routers.slack.client.chat_postEphemeral")
+def test_interactions_unknown_action_id(
+    mock_post_ephemeral, client, db_session, mock_valid_signature
+):
+    user = User(name="Test User", email="test3@example.com")
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    payload = {
+        "channel": {"id": "C12345"},
+        "user": {"id": "U12345"},
+        "actions": [
+            {"action_id": "some_future_action", "value": f"{user.id}:something"}
+        ],
+    }
+
+    response = client.post(
+        "/slack/interactions",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        data={"payload": json.dumps(payload)},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+
+    db_session.refresh(user)
+    assert user.daily_status is None
+
+    mock_post_ephemeral.assert_called_once_with(
+        channel="C12345",
+        user="U12345",
+        text="Sorry, this button is no longer active or is unrecognized.",
+    )

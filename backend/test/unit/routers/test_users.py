@@ -32,7 +32,9 @@ def test_get_me_valid_token(client, db_session):
     db_session.commit()
     response = client.get("/users/me", headers={"Authorization": "Bearer secret-token"})
     assert response.status_code == 200
-    assert response.json()["email"] == "test@example.com"
+    data = response.json()
+    assert data["email"] == "test@example.com"
+    assert "api_token" not in data
 
 
 def test_get_me_invalid_token(client):
@@ -55,7 +57,9 @@ def test_update_status_success(client, db_session):
         headers={"Authorization": "Bearer secret-token"},
     )
     assert response.status_code == 200
-    assert response.json()["daily_status"] == "Looking"
+    data = response.json()
+    assert data["daily_status"] == "Looking"
+    assert "api_token" not in data
 
 
 def test_update_status_wrong_user(client, db_session):

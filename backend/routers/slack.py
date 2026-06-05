@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 import models
 from core.database import get_db
 from core.config import settings
+from services.slack import client
+from slack_sdk.errors import SlackApiError
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/slack", tags=["slack"])
@@ -64,6 +66,20 @@ async def slack_interactions(
         user.daily_status = "Looking"
     elif action_id == "set_status_skip":
         user.daily_status = "Solo"
+    else:
+        logger.warning(f"Unrecognised action_id received from Slack: {action_id!r}")
+        channel_id = payload.get("channel", {}).get("id")
+        slack_user_id = payload.get("user", {}).get("id")
+        if channel_id and slack_user_id:
+            try:
+                client.chat_postEphemeral(
+                    channel=channel_id,
+                    user=slack_user_id,
+                    text="Sorry, this button is no longer active or is unrecognized.",
+                )
+            except SlackApiError as e:
+                logger.error(f"Failed to send ephemeral error: {e.response['error']}")
+        return {"ok": True}
 
     db.commit()
 
