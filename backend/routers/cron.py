@@ -9,6 +9,10 @@ from core.database import get_db, settings
 from routers.voting import finalize_group
 from slack_sdk.errors import SlackApiError
 from services.slack import client
+from services.slack_messages import (
+    build_morning_prompt_blocks,
+    build_winner_announcement_blocks,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -34,41 +38,10 @@ def morning_prompt(db: Session = Depends(get_db)):
             logger.warning(f"User {user.id} has no slack_user_id, skipping.")
             continue
 
-        # Simulate Slack Block Kit payload
-        slack_payload = {
-            "channel": user.slack_user_id,
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"Good morning {user.name}! Are you looking for a lunch group today?",
-                    },
-                },
-                {
-                    "type": "actions",
-                    "elements": [
-                        {
-                            "type": "button",
-                            "text": {"type": "plain_text", "text": "Yes, I'm looking"},
-                            "value": f"{user.id}:status_looking",
-                            "action_id": "set_status_looking",
-                        },
-                        {
-                            "type": "button",
-                            "text": {"type": "plain_text", "text": "No, skip me"},
-                            "value": f"{user.id}:status_skip",
-                            "action_id": "set_status_skip",
-                        },
-                    ],
-                },
-            ],
-        }
+        blocks = build_morning_prompt_blocks(user_id=user.id, user_name=user.name)
 
         try:
-            client.chat_postMessage(
-                channel=user.slack_user_id, blocks=slack_payload["blocks"]
-            )
+            client.chat_postMessage(channel=user.slack_user_id, blocks=blocks)
         except SlackApiError as e:
             logger.error(f"Failed to DM user {user.id}: {e.response['error']}")
 
@@ -129,21 +102,12 @@ def trigger_finalize_votes(db: Session = Depends(get_db)):
                         )
                         continue
 
-                    slack_payload = {
-                        "channel": user.slack_user_id,
-                        "blocks": [
-                            {
-                                "type": "section",
-                                "text": {
-                                    "type": "mrkdwn",
-                                    "text": f"Lunch Group #{group.id} finalized! The winning restaurant is: *{winner_name}*",
-                                },
-                            }
-                        ],
-                    }
+                    blocks = build_winner_announcement_blocks(
+                        group_id=group.id, winner_name=winner_name
+                    )
                     try:
                         client.chat_postMessage(
-                            channel=user.slack_user_id, blocks=slack_payload["blocks"]
+                            channel=user.slack_user_id, blocks=blocks
                         )
                     except SlackApiError as e:
                         logger.error(
