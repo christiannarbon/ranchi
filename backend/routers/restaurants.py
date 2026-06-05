@@ -1,31 +1,13 @@
-from fastapi import APIRouter, HTTPException, Query
-from typing import List
-from pydantic import BaseModel
-
-from services.places import search_nearby_restaurants
+from fastapi import APIRouter, Query, HTTPException
+from services.places import search_restaurants
 
 router = APIRouter(prefix="/restaurants", tags=["restaurants"])
 
 
-class RestaurantResponse(BaseModel):
-    name: str
-    address: str
-    place_id: str
-
-
-@router.get("/search", response_model=List[RestaurantResponse])
-async def search_restaurants(
-    query: str = Query(..., description="Search query for restaurants"),
-):
-    """
-    Search for nearby restaurants based on a query string.
-    Currently returns mocked static data.
-    """
+@router.get("/search")
+def search(query: str = Query(..., min_length=2)):
+    """Search for restaurants by name. Requires Google Places API key (Epic 3)."""
     try:
-        results = await search_nearby_restaurants(query)
-        return results
-    except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to fetch restaurant data from external service.",
-        )
+        return search_restaurants(query)
+    except NotImplementedError as e:
+        raise HTTPException(status_code=501, detail=str(e))
