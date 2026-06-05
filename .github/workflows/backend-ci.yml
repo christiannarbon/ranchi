@@ -40,10 +40,7 @@ jobs:
     - name: Run Unit Tests
       run: uv run pytest test/unit
 
-    - name: Clear old GitHub Actions caches
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: gh cache delete --all --succeed-on-no-caches --repo ${{ github.repository }}
+
 
   docker-lint:
     runs-on: ubuntu-latest

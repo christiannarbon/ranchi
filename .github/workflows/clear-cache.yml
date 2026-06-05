@@ -1,0 +1,24 @@
+name: Clear Cache
+
+on:
+  workflow_run:
+    workflows: ["Backend Lint", "Frontend CI"]
+    types:
+      - completed
+
+concurrency:
+  group: clear-cache
+  cancel-in-progress: false
+
+jobs:
+  clear-cache:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clear old GitHub Actions caches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh cache delete --all --succeed-on-no-caches --repo ${{ github.repository }}
