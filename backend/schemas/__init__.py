@@ -11,11 +11,12 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    pass
+    slack_user_id: Optional[str] = None
 
 
 class UserResponse(UserBase):
     id: int
+    api_token: str
 
     model_config = ConfigDict(from_attributes=True)
 
