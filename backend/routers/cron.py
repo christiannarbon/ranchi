@@ -33,6 +33,7 @@ def morning_prompt(db: Session = Depends(get_db)):
     """Simulate sending a morning Slack prompt to all active users."""
     # Assuming all users in DB are active
     users = db.query(models.User).all()
+    notified_count = 0
 
     for user in users:
         if not user.slack_user_id:
@@ -43,10 +44,11 @@ def morning_prompt(db: Session = Depends(get_db)):
 
         try:
             client.chat_postMessage(channel=user.slack_user_id, blocks=blocks)
+            notified_count += 1
         except SlackApiError as e:
             logger.error(f"Failed to DM user {user.id}: {e.response['error']}")
 
-    return {"status": "Morning prompts simulated", "users_notified": len(users)}
+    return {"status": "Morning prompts sent", "users_notified": notified_count}
 
 
 @router.post("/finalize-votes", dependencies=[Depends(verify_cron_secret)])
