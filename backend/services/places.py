@@ -1,15 +1,37 @@
-import logging
+import httpx
+from core.config import settings
 
-logger = logging.getLogger(__name__)
+PLACES_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+
+
+class PlacesAPIError(Exception):
+    pass
 
 
 def search_restaurants(query: str) -> list[dict]:
-    """
-    Search for restaurants matching the given query via Google Places API.
-
-    TODO (Epic 3): Implement real Google Places Text Search API call using httpx.
-    Reference: https://developers.google.com/maps/documentation/places/web-service/text-search
-    """
-    raise NotImplementedError(
-        "Google Places search is not yet implemented. See Epic 3 — Restaurant Search."
+    response = httpx.get(
+        PLACES_URL,
+        params={
+            "query": query,
+            "type": "restaurant",
+            "key": settings.google_places_api_key,
+        },
     )
+    data = response.json()
+
+    if data.get("status") == "ZERO_RESULTS":
+        return []
+
+    if data.get("status") != "OK":
+        raise PlacesAPIError(f"Google Places API error: {data.get('status')}")
+
+    results = []
+    for place in data.get("results", [])[:5]:
+        results.append(
+            {
+                "name": place["name"],
+                "address": place.get("formatted_address", ""),
+                "place_id": place["place_id"],
+            }
+        )
+    return results
