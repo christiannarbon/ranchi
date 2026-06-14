@@ -4,8 +4,14 @@ import { storeToRefs } from 'pinia'
 import GroupVoting from './GroupVoting.vue'
 
 const store = useLunchStore()
-const { currentUserStatus, availableCoworkers, currentGroupId, isStatusLoading, isGroupLoading } =
-  storeToRefs(store)
+const {
+  currentUserStatus,
+  availableCoworkers,
+  currentGroupId,
+  isStatusLoading,
+  isGroupLoading,
+  statusError
+} = storeToRefs(store)
 const { setStatus, createGroup } = store
 
 const statuses = [
@@ -102,6 +108,9 @@ const statuses = [
           ></div>
         </button>
       </div>
+      <p v-if="statusError" class="text-xs text-red-500 mt-2 font-medium">
+        {{ statusError }}
+      </p>
     </section>
 
     <!-- Group Action Section -->
