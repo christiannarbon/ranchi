@@ -27,6 +27,18 @@ export const useLunchStore = defineStore('lunch', () => {
   // Actions
   async function setStatus(status) {
     if (currentUserStatus.value === status || isStatusLoading.value) return
+    isStatusLoading.value = true
+    statusError.value = null
+    try {
+      const user = await api.patch(`/users/${currentUserId.value}/status`, {
+        daily_status: status
+      })
+      currentUserStatus.value = user.daily_status
+    } catch (err) {
+      statusError.value = err.message
+    } finally {
+      isStatusLoading.value = false
+    }
   }
 
   async function createGroup() {
