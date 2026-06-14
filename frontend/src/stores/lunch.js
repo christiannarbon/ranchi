@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { api } from '../api/client'
 
 export const useLunchStore = defineStore('lunch', () => {
   // State
@@ -14,27 +15,22 @@ export const useLunchStore = defineStore('lunch', () => {
   const isStatusLoading = ref(false)
   const isGroupLoading = ref(false)
 
-  // Actions
-  function setStatus(status) {
-    if (currentUserStatus.value === status || isStatusLoading.value) return
-    isStatusLoading.value = true
+  const currentUserId = ref(
+    typeof window !== 'undefined' && window.localStorage
+      ? window.localStorage.getItem('user_id')
+      : null
+  )
+  const coworkers = ref([])
+  const statusError = ref(null)
+  const groupError = ref(null)
 
-    // Mock API call with setTimeout
-    setTimeout(() => {
-      currentUserStatus.value = status
-      isStatusLoading.value = false
-    }, 500)
+  // Actions
+  async function setStatus(status) {
+    if (currentUserStatus.value === status || isStatusLoading.value) return
   }
 
-  function createGroup() {
+  async function createGroup() {
     if (isGroupLoading.value || currentGroupId.value) return
-    isGroupLoading.value = true
-
-    // Mock creating a group via API
-    setTimeout(() => {
-      currentGroupId.value = 'group-' + Math.random().toString(36).substr(2, 9)
-      isGroupLoading.value = false
-    }, 800)
   }
 
   return {
@@ -43,6 +39,10 @@ export const useLunchStore = defineStore('lunch', () => {
     currentGroupId,
     isStatusLoading,
     isGroupLoading,
+    currentUserId,
+    coworkers,
+    statusError,
+    groupError,
     setStatus,
     createGroup
   }
