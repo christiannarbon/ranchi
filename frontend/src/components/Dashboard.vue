@@ -10,7 +10,8 @@ const {
   currentGroupId,
   isStatusLoading,
   isGroupLoading,
-  statusError
+  statusError,
+  groupError
 } = storeToRefs(store)
 const { setStatus, createGroup } = store
 
@@ -140,51 +141,58 @@ const statuses = [
           <span class="text-xl font-mono mt-1 text-emerald-400">{{ currentGroupId }}</span>
         </div>
 
-        <button
-          v-else
-          @click="createGroup"
-          :disabled="isGroupLoading"
-          class="shrink-0 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-400 hover:to-rose-400 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-orange-500/30 active:scale-95 disabled:opacity-70 disabled:cursor-wait"
-        >
-          <!-- Loading Spinner -->
-          <svg
-            v-if="isGroupLoading"
-            class="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
+        <div v-else class="flex flex-col items-center md:items-end gap-2">
+          <button
+            @click="createGroup"
+            :disabled="isGroupLoading"
+            class="shrink-0 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-400 hover:to-rose-400 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-orange-500/30 active:scale-95 disabled:opacity-70 disabled:cursor-wait"
           >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
+            <!-- Loading Spinner -->
+            <svg
+              v-if="isGroupLoading"
+              class="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
               stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            {{ isGroupLoading ? 'Creating...' : 'Create Group' }}
+          </button>
+          <span
+            v-if="groupError"
+            class="text-xs text-rose-400 font-medium max-w-xs text-center md:text-right"
           >
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          {{ isGroupLoading ? 'Creating...' : 'Create Group' }}
-        </button>
+            {{ groupError }}
+          </span>
+        </div>
       </div>
     </section>
 
