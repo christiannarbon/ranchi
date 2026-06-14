@@ -43,6 +43,16 @@ export const useLunchStore = defineStore('lunch', () => {
 
   async function createGroup() {
     if (isGroupLoading.value || currentGroupId.value) return
+    isGroupLoading.value = true
+    groupError.value = null
+    try {
+      const group = await api.post('/groups', {})
+      currentGroupId.value = group.id // integer now, not 'group-xxxx'
+    } catch (err) {
+      groupError.value = err.message
+    } finally {
+      isGroupLoading.value = false
+    }
   }
 
   return {
