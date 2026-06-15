@@ -1,10 +1,14 @@
-.PHONY: setup lint format check test setup-frontend lint-frontend format-frontend check-frontend check-all
+.PHONY: setup lint format check test setup-frontend lint-frontend format-frontend check-frontend check-all migrate
 
 # --- Backend ---
 setup:
 	@echo "Setting up backend environment with uv..."
 	cd backend && uv sync
 	@echo "Backend environment setup complete."
+
+migrate:
+	@echo "Running Alembic migrations..."
+	cd backend && uv run alembic upgrade head
 
 lint:
 	@echo "Running ruff linter..."
