@@ -18,6 +18,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Run Hadolint
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: ./frontend/Dockerfile
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
