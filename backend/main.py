@@ -1,5 +1,7 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from core.database import engine
+from core.config import settings
 import models
 from routers import users, groups, restaurants, voting, cron, slack
 
@@ -10,6 +12,16 @@ app = FastAPI(
     title="Ranchi App API",
     description="Backend API for user groups and nominations",
     version="1.0.0",
+)
+
+# Allow the frontend (and Vercel preview deploys) to call the API from the browser.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins_list,
+    allow_origin_regex=settings.cors_origin_regex,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include the routers
