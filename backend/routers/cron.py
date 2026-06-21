@@ -20,15 +20,16 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/cron", tags=["cron"])
 
 
-def verify_cron_secret(x_cron_secret: str | None = Header(None)):
-    """Dependency to check the X-Cron-Secret header against the server settings."""
-    if not x_cron_secret or x_cron_secret != settings.cron_secret:
+def verify_cron_secret(authorization: str | None = Header(None)):
+    """Validate Vercel Cron's Authorization: Bearer <CRON_SECRET> header."""
+    expected = f"Bearer {settings.cron_secret}"
+    if not authorization or authorization != expected:
         raise HTTPException(
-            status_code=401, detail="Invalid or missing X-Cron-Secret header"
+            status_code=401, detail="Invalid or missing cron authorization"
         )
 
 
-@router.post("/morning-prompt", dependencies=[Depends(verify_cron_secret)])
+@router.get("/morning-prompt", dependencies=[Depends(verify_cron_secret)])
 def morning_prompt(db: Session = Depends(get_db)):
     """Simulate sending a morning Slack prompt to all active users."""
     # Assuming all users in DB are active
@@ -51,7 +52,7 @@ def morning_prompt(db: Session = Depends(get_db)):
     return {"status": "Morning prompts sent", "users_notified": notified_count}
 
 
-@router.post("/finalize-votes", dependencies=[Depends(verify_cron_secret)])
+@router.get("/finalize-votes", dependencies=[Depends(verify_cron_secret)])
 def trigger_finalize_votes(db: Session = Depends(get_db)):
     """Find all unlocked groups created today, finalize them, and print winner to console."""
     today = date.today()

@@ -5,5 +5,9 @@
   ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/index" }
+  ],
+  "crons": [
+    { "path": "/cron/morning-prompt", "schedule": "0 0 * * 1-5" },
+    { "path": "/cron/finalize-votes",  "schedule": "0 4 * * 1-5" }
   ]
 }
