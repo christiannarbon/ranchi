@@ -179,17 +179,28 @@ After adding/changing it, **redeploy the backend** (Vercel → backend project �
 
 Ranchi has two cron endpoints (`backend/routers/cron.py`):
 
-- `POST /cron/morning-prompt`
-- `POST /cron/finalize-votes`
+- `GET /cron/morning-prompt`
+- `GET /cron/finalize-votes`
 
-Both require an `X-Cron-Secret` header matching the `CRON_SECRET` env var. You can trigger them manually to test:
+The app uses Vercel Cron to schedule these jobs. The schedules are configured in `backend/vercel.json` under `"crons"`:
 
-```bash
-curl -X POST https://ranchi-backend.vercel.app/cron/morning-prompt \
-  -H "X-Cron-Secret: <your CRON_SECRET value>"
+```json
+[
+  { "path": "/cron/morning-prompt", "schedule": "0 0 * * 1-5" },
+  { "path": "/cron/finalize-votes",  "schedule": "0 4 * * 1-5" }
+]
 ```
 
-> **Note on Vercel Cron:** Vercel's built-in cron only sends **GET** requests and uses an `Authorization: Bearer` header, while these endpoints expect **POST** with `X-Cron-Secret`. So Vercel Cron won't drive them as-is. For automated scheduling without code changes, use an external scheduler (e.g. GitHub Actions on a schedule, cron-job.org, or Supabase's `pg_cron` + `pg_net`) that issues the POST with the custom header. This is only needed if you want the daily automation; manual `curl` is enough to test the flow.
+Vercel automatically sends the `Authorization: Bearer <CRON_SECRET>` header to cron requests when the `CRON_SECRET` environment variable is configured in your backend Vercel project settings, so no extra scheduling configuration is required.
+
+> **Note:** The Vercel Hobby plan limits cron frequency to daily granularity; the weekday schedules (`1-5` for Monday–Friday) defined above are fully acceptable under these limits.
+
+You can trigger them manually to test:
+
+```bash
+curl https://ranchi-backend.vercel.app/cron/morning-prompt \
+  -H "Authorization: Bearer <your CRON_SECRET value>"
+```
 
 ---
 
