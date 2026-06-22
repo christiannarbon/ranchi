@@ -1,4 +1,4 @@
-import uuid
+import secrets
 from typing import List, Optional, TYPE_CHECKING
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -20,7 +20,7 @@ class User(Base):
         String, nullable=True, unique=True
     )
     api_token: Mapped[str] = mapped_column(
-        String, unique=True, index=True, default=lambda: str(uuid.uuid4())
+        String, unique=True, index=True, default=lambda: secrets.token_urlsafe(32)
     )
 
     group_members: Mapped[List["GroupMember"]] = relationship(
