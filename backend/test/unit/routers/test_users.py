@@ -1,10 +1,42 @@
 from models import User
 
 
-def test_get_looking_users_empty(client):
-    response = client.get("/users/looking")
+def test_get_looking_users_empty(client, db_session):
+    user = User(email="test@example.com", name="Test User", api_token="secret-token")
+    db_session.add(user)
+    db_session.commit()
+    response = client.get(
+        "/users/looking", headers={"Authorization": "Bearer secret-token"}
+    )
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_looking_requires_auth(client):
+    response = client.get("/users/looking")
+    assert response.status_code == 401
+
+
+def test_looking_excludes_email(client, db_session):
+    user = User(
+        email="test@example.com",
+        name="Test User",
+        api_token="secret-token",
+        daily_status="Looking",
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    response = client.get(
+        "/users/looking", headers={"Authorization": "Bearer secret-token"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert "email" not in data[0]
+    assert "api_token" not in data[0]
+    assert data[0]["id"] == user.id
+    assert data[0]["name"] == "Test User"
 
 
 def test_register_success(client):
