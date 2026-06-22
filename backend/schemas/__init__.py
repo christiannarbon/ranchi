@@ -29,6 +29,13 @@ class UserPublicResponse(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserLookingResponse(BaseModel):
+    id: int
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 # --- Group Schemas ---
 class GroupBase(BaseModel):
     is_locked: bool = False
