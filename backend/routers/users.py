@@ -1,3 +1,4 @@
+import secrets
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from typing import List
@@ -34,6 +35,17 @@ def register_user(
 
 @router.get("/me", response_model=schemas.UserPublicResponse)
 def get_me(current_user: models.User = Depends(get_current_user)):
+    return current_user
+
+
+@router.post("/me/rotate-token", response_model=schemas.UserResponse)
+def rotate_token(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    current_user.api_token = secrets.token_urlsafe(32)
+    db.commit()
+    db.refresh(current_user)
     return current_user
 
 
