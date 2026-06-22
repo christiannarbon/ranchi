@@ -117,3 +117,38 @@ def test_update_status_invalid_value(client, db_session):
         headers={"Authorization": "Bearer secret-token"},
     )
     assert response.status_code == 422
+
+
+def test_rotate_token_requires_auth(client):
+    response = client.post("/users/me/rotate-token")
+    assert response.status_code == 401
+
+
+def test_rotate_token_changes_token(client, db_session):
+    user = User(email="rotate@example.com", name="Rotator", api_token="old-token")
+    db_session.add(user)
+    db_session.commit()
+
+    response = client.post(
+        "/users/me/rotate-token", headers={"Authorization": "Bearer old-token"}
+    )
+    assert response.status_code == 200
+    new_token = response.json()["api_token"]
+    assert new_token != "old-token"
+    assert len(new_token) > 0
+
+
+def test_old_token_stops_working_after_rotation(client, db_session):
+    user = User(email="rotate2@example.com", name="Rotator 2", api_token="old-token-2")
+    db_session.add(user)
+    db_session.commit()
+
+    # Rotate
+    response = client.post(
+        "/users/me/rotate-token", headers={"Authorization": "Bearer old-token-2"}
+    )
+    assert response.status_code == 200
+
+    # Old token fails
+    response2 = client.get("/users/me", headers={"Authorization": "Bearer old-token-2"})
+    assert response2.status_code == 401
