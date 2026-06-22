@@ -37,8 +37,11 @@ def get_me(current_user: models.User = Depends(get_current_user)):
     return current_user
 
 
-@router.get("/looking", response_model=List[schemas.UserPublicResponse])
-def get_looking_users(db: Session = Depends(get_db)):
+@router.get("/looking", response_model=List[schemas.UserLookingResponse])
+def get_looking_users(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     """Retrieve all users whose daily status is 'Looking'."""
     users = db.query(models.User).filter(models.User.daily_status == "Looking").all()
     return users
