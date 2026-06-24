@@ -10,8 +10,8 @@ class Settings(BaseSettings):
 
     # Comma-separated list of allowed CORS origins (the frontend URLs).
     cors_origins: str = "http://localhost:5173"
-    # Optional regex for matching origins (e.g. Vercel preview deploys).
-    cors_origin_regex: str = r"https://.*\.vercel\.app"
+    # Optional/opt-in regex for matching origins (e.g. Vercel preview deploys).
+    cors_origin_regex: str = ""
 
     @property
     def cors_origins_list(self) -> list[str]:
