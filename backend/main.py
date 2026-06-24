@@ -15,14 +15,15 @@ app = FastAPI(
 )
 
 # Allow the frontend (and Vercel preview deploys) to call the API from the browser.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
-    allow_origin_regex=settings.cors_origin_regex,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+cors_kwargs = {
+    "allow_origins": settings.cors_origins_list,
+    "allow_credentials": True,
+    "allow_methods": ["*"],
+    "allow_headers": ["*"],
+}
+if settings.cors_origin_regex:
+    cors_kwargs["allow_origin_regex"] = settings.cors_origin_regex
+app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 # Include the routers
 app.include_router(users.router)
