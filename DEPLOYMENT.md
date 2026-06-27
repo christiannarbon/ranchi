@@ -66,7 +66,7 @@ This guide walks you through getting a live, testable instance of **Ranchi** run
 
 > **Why the pooler?** Each serverless invocation can open a new DB connection. Direct connections (port 5432) exhaust Postgres quickly under serverless. The transaction pooler is designed for this. The app uses synchronous `psycopg2` with `pool_pre_ping=True` (`backend/core/database.py`), which works fine with the pooler.
 
-> **Schema creation:** You do **not** need to run Alembic for a first deploy. On startup, `backend/main.py` calls `models.Base.metadata.create_all(bind=engine)`, which creates all tables automatically the first time the backend boots. (For real migrations later, use the Alembic setup in `backend/alembic/`.)
+> **Schema creation:** The database schema is managed by Alembic. Before or after deploying the backend, run `alembic upgrade head` from the `backend/` directory (with the `DATABASE_URL` environment variable pointing at your database) to create or update the schema.
 
 ---
 
