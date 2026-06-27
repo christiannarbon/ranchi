@@ -1,12 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from core.database import engine
+from core.database import engine  # noqa: F401
 from core.config import settings
-import models
+import models  # noqa: F401
 from routers import users, groups, restaurants, voting, cron, slack
-
-# Automatically create all database tables using SQLAlchemy
-models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Ranchi App API",
