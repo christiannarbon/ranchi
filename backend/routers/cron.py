@@ -1,5 +1,6 @@
 import logging
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -55,14 +56,16 @@ def morning_prompt(db: Session = Depends(get_db)):
 @router.get("/finalize-votes", dependencies=[Depends(verify_cron_secret)])
 def trigger_finalize_votes(db: Session = Depends(get_db)):
     """Find all unlocked groups created today, finalize them, and print winner to console."""
-    today = date.today()
+    jst = ZoneInfo("Asia/Tokyo")
+    today_jst = datetime.now(jst).date()
 
-    # Query unlocked groups created today
+    # Query unlocked groups created today (JST business day)
     unlocked_groups = (
         db.query(models.Group)
         .filter(
             models.Group.is_locked.is_(False),
-            func.date(models.Group.created_at) == today,
+            func.date(func.timezone("Asia/Tokyo", models.Group.created_at))
+            == today_jst,
         )
         .all()
     )
