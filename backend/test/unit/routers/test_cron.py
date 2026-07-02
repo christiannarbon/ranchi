@@ -62,6 +62,27 @@ def test_morning_prompt_skips_users_without_slack_id(
 
 
 def test_cron_finalize_votes(client, db_session):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    def sqlite_timezone(tz_name, dt_val):
+        if not dt_val:
+            return None
+        try:
+            if isinstance(dt_val, str):
+                dt = datetime.fromisoformat(dt_val)
+            else:
+                dt = dt_val
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+            target_tz = ZoneInfo(tz_name)
+            converted = dt.astimezone(target_tz)
+            return converted.strftime("%Y-%m-%d %H:%M:%S.%f")
+        except Exception:
+            return dt_val
+
+    db_session.connection().connection.create_function("timezone", 2, sqlite_timezone)
+
     group = Group(is_locked=False)
     db_session.add(group)
     db_session.commit()
