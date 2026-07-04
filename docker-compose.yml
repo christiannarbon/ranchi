@@ -1,3 +1,4 @@
+# LOCAL DEVELOPMENT ONLY. Production runs on Vercel + Supabase (see DEPLOYMENT.md).
 services:
   db:
     image: postgres:16-alpine
