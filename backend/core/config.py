@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"
     # Optional/opt-in regex for matching origins (e.g. Vercel preview deploys).
     cors_origin_regex: str = ""
+    sentry_dsn: str = ""
 
     @property
     def cors_origins_list(self) -> list[str]:
