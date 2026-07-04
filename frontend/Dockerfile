@@ -1,3 +1,4 @@
+# LOCAL DEVELOPMENT ONLY. Production runs on Vercel + Supabase (see DEPLOYMENT.md).
 # Stage 1: build
 FROM node:20-alpine AS build
 WORKDIR /app
