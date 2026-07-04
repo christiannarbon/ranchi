@@ -8,6 +8,11 @@
 
 **Ranchi** is a collaborative Lunch Group formation app explicitly designed for those participating in RTO (Return to Office). It allows users to flag if they are looking for lunch, form groups dynamically, vote on a shortlist of restaurants, and seamlessly finalize a winner.
 
+## Deployment topology
+
+- **Production:** Vercel (FastAPI backend as serverless functions + Vue frontend as a static site) with Supabase Postgres. See [DEPLOYMENT.md](file:///Users/christianedensorarbon/personal_dev/ranchi/DEPLOYMENT.md) for the full guide. This is the canonical deployment.
+- **Local development:** `docker-compose up` brings up the stack locally. The Docker/Compose/nginx files exist for local development convenience only and are **not** used in production.
+
 ## Features
 
 - **Daily Statuses**: Mark yourself as "Looking" for a lunch group via automated morning cron jobs.
