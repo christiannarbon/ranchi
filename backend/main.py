@@ -1,9 +1,17 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 from core.database import engine  # noqa: F401
+from core.database import get_db
 from core.config import settings
 import models  # noqa: F401
 from routers import users, groups, restaurants, voting, cron, slack
+
+if settings.sentry_dsn:
+    import sentry_sdk
+
+    sentry_sdk.init(dsn=settings.sentry_dsn, traces_sample_rate=0.0)
 
 app = FastAPI(
     title="Ranchi App API",
@@ -34,3 +42,12 @@ app.include_router(slack.router)
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Ranchi App API! Visit /docs for Swagger UI."}
+
+
+@app.get("/health")
+def health_check(db: Session = Depends(get_db)):
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception:
+        raise HTTPException(status_code=503, detail="database unavailable")
+    return {"status": "ok"}
